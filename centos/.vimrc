@@ -13,3 +13,9 @@ nnoremap <CR> :noh<CR><CR>
 
 ab { {<CR>}<Up>
 
+if has("autocmd")
+    augroup templates
+        autocmd BufNewFile *.sh 0r ~/.vim/templates/template.sh
+        autocmd BufNewFile *.pl 0r ~/.vim/templates/template.pl
+    augroup END
+endif
