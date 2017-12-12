@@ -5,13 +5,12 @@ set shiftwidth=4
 set expandtab
 
 set pastetoggle=<F2>
-
 filetype plugin indent on
 
 set nu
 nnoremap <CR> :noh<CR><CR>
 
-ab { {<CR>}<Up>
+ab { {<CR>}<Up><End>
 
 if has("autocmd")
     augroup templates
