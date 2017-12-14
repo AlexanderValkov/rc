@@ -7,14 +7,7 @@ fi
 
 # User specific aliases and functions
 
-function parse_git_branch () {
-	BRANCH=`git branch 2>/dev/null | grep -E "^\*" | cut -d' ' -f2`
-	if [ $BRANCH ]; then
-        echo "$BRANCH "
-    fi
-}
-
-PS1='\[\e[1;34m\]\w\[\e[m\] \[\e[1;30m\]$(parse_git_branch)\[\e[m\]\[\e[1;32m\]\$ \[\e[m\]'
+PS1='\[\e[1;34m\]\w\[\e[m\]\[\e[1;30m\]$(__git_ps1 " %s") \[\e[m\]\[\e[1;32m\]\$ \[\e[m\]'
 
 alias lh='ls -lh'
 alias yum='sudo yum'
