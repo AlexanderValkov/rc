@@ -26,3 +26,6 @@ function csmake () {
     CFILE=`echo $1 | cut -d'.' -f1`
     clang -fsanitize=integer -fsanitize=undefined -ggdb3 -O0 -std=c11 -Wall -Werror -Wextra -Wno-sign-compare -Wshadow ${CFILE}.c -lcrypt -lm -o $CFILE
 }
+
+eval "$(pipenv --completion)"       # autocomplete for pipenv
+export PIPENV_VENV_IN_PROJECT=1     # .venv in project folder 
