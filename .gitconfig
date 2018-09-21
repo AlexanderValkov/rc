@@ -1,0 +1,9 @@
+[user]
+    email = 
+    name = 
+[color]
+    ui = auto
+[alias]
+    s = status
+    c = commit
+    lo = log --oneline --decorate --graph --all
