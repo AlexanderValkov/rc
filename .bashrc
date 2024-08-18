@@ -17,15 +17,51 @@ function parse_git_branch () {
     fi
 }
 
-PS1='\[\e[1;34m\]\w\[\e[m\] \[\e[1;30m\]$(parse_git_branch)\[\e[m\]\[\e[1;32m\]\$ \[\e[m\]'
+function workload () {
+    for NODE in $(kubectl get nodes --sort-by='{.metadata.creationTimestamp}' --no-headers | cut -d' ' -f1); do  kubectl get node -o wide $NODE --no-headers && kubectl describe node $NODE | grep -A 175 'Non-terminated Pods' | grep -B 175 'Allocated resources' | grep -E "^\s+" | grep -vE "aws-node|ebs-csi-node|kube-proxy-|fluent-bit-|node-exporter"; done
+}
 
-alias lh='ls -lh'
-alias tb='nc termbin.com 9999'
+function get_pods () {
+    kubectl get pods --all-namespaces --sort-by='{.status.startTime}' | grep -vE "overp|aws-node|ebs-csi-node|kube-proxy-|fluent-bit-"
+}
+
+function get_kube_cluster () {
+    CURRENT_CLUSTER=`grep current-context ~/.kube/config | cut -d/ -f2`
+    if [ $CURRENT_CLUSTER ]; then
+        echo "$CURRENT_CLUSTER"
+    fi
+}
+
+function vaml() {
+    vim -R -c 'set syntax=yaml' -;
+}
 
 function csmake () {
     CFILE=`echo $1 | cut -d'.' -f1`
     clang -fsanitize=integer -fsanitize=undefined -ggdb3 -O0 -std=c11 -Wall -Werror -Wextra -Wno-sign-compare -Wshadow ${CFILE}.c -lcrypt -lm -o $CFILE
 }
 
-eval "$(pipenv --completion)"       # autocomplete for pipenv
-export PIPENV_VENV_IN_PROJECT=1     # .venv in project folder 
+PS1='\[\e[1;34m\]\w\[\e[m\] \[\e[1;30m\]$(parse_git_branch)\[\e[m\]\[\e[1;32m\]\$ \[\e[m\]'
+#PS1='\[\e[m\]\[\e[1;34m\] k8s:\[\e[m\]\[\e[1;38m\]$(get_kube_cluster) \[\e[1;34m\]\w\[\e[m\] \[\e[1;30m\]$(parse_git_branch)\[\e[m\]\[\e[1;32m\]\$ \[\e[m\]'
+
+eval "$(dircolors -b)"
+alias lh='ls -lh --color=auto --group-directories-first'
+alias tb='nc termbin.com 9999'
+alias show_parent_branch='git show-branch | grep -v "$(git rev-parse --abbrev-ref HEAD)" | grep -Eo "\*.*\[.*\]" | grep -Eo "(\w+|_|-|\/)" | head -n 1'
+
+#KUBEALIASES
+alias nodes='kubectl get nodes -o wide --sort-by="{.metadata.creationTimestamp}"'
+alias zones='for NODE in $(kubectl get nodes --no-headers | cut -d" " -f1); do echo $NODE: $(kubectl get node $NODE -o jsonpath="{.metadata.labels.topology\.ebs\.csi\.aws\.com/zone}"); done | column -t'
+alias pods='kubectl get pods --all-namespaces --sort-by="{.status.startTime}" | grep -vE "overp|aws-node|ebs-csi-node|kube-proxy-|fluent-bit-"'
+
+alias aaa='complete -C /usr/local/bin/aws_completer aws && complete -C /usr/local/bin/terraform terragrunt && source <(kubectl completion bash) && source <(helm completion bash)'
+HISTSIZE=-1
+HISTFILESIZE=-1
+
+
+if [ -z $TMUX ]; then
+    tmux
+else
+    mesg n
+    PS1='\[\e[1;34m\]\w\[\e[m\] \[\e[1;30m\]$(parse_git_branch)\[\e[m\]\[\e[1;32m\]\$ \[\e[m\]'
+fi
